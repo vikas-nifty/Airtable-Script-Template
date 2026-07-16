@@ -1,38 +1,32 @@
 # Airtable Scripting Workspace Template
 
-This template is designed for Airtable scripting work where an AI assistant needs a structured, reusable workflow.
+A reusable, gated workspace for building Airtable scripts with verified schema
+and input dependencies.
 
 ## Structure
 
-- AGENTS.md: automatically discovered workspace instructions
+- `AGENTS.md`: automatically discovered operating instructions.
+- `Methods/prompt.md`: workflow and Airtable constraints.
+- `Methods/codingStyle.md`: compact production coding standards.
+- `Context/baseSchema.md`: fresh tables, views, and fields from the target base.
+- `Context/inputConfig.md`: verified inputs for each script.
+- `output/plan.md`: goal, gates, dependencies, and script handoffs.
+- `output/console_log.md`: latest labelled runtime output.
+- `output/script.js`: one final script.
+- `output/script1.js`, `output/script2.js`, ...: separate Automation script actions.
 
-- Methods/
-  - prompt.md: global prompt instructions
-  - codingStyle.md: coding conventions for Airtable scripts
+## Workflow
 
-- Context/
-  - inputConfig.md: place to store the runtime input configuration and its output
-  - baseSchema.md: place to store the compact base schema and its output
+1. State the goal.
+2. Capture and verify a fresh base schema.
+3. Plan the script and map every dependency.
+4. Configure and verify all Airtable inputs.
+5. Write code.
+6. Test and revise one verified step at a time.
 
-- output/
-  - plan.md: current plan for the task
-  - console_log.md: latest console output
-  - script.js: final single script ready to paste into the Airtable script editor
-  - script1.js, script2.js, ...: separate scripts when an Automation is split across multiple script actions
+Context files are authoritative. Never hard-code table, view, or field names or
+IDs. If a new dependency appears, update and verify the input configuration
+before continuing.
 
-## How to Use
-
-1. State the script goal.
-2. Capture and verify a fresh base schema in Context/baseSchema.md.
-3. Create the plan and table, view, and field dependency map.
-4. Configure every dependency in Airtable and verify the logged input configuration in Context/inputConfig.md.
-5. Write the script only after those gates pass.
-6. Save runtime logs in output/console_log.md and iterate one verified step at a time.
-
-## Notes
-
-The files in Context are treated as authoritative. If a required input or field is missing, pause and ask the user to create or update the relevant context file before continuing.
-
-The root `AGENTS.md` file is automatically discovered by compatible coding agents and directs them to the reusable instructions in `Methods/`.
-
-An Automation may use multiple script actions. Scripts do not share runtime context, so pass values explicitly between actions or persist them in Airtable. Use numbered output files when a workflow is split.
+Automation scripts share no runtime context. Pass values explicitly between
+actions or persist them in Airtable.

@@ -1,120 +1,80 @@
 # Airtable JavaScript Coding Style
 
-Write like a high-performance production engineer: understand the job, choose the simplest efficient data flow, make correctness visible, and remove everything that does not earn its place.
+Write compact production code: correct first, efficient where it matters, and readable in one pass.
 
-## 1. Think before writing
+## Think and design
 
-- Define the required outcome, execution environment, inputs, outputs, invariants, side effects, expected record volume, and realistic failure modes.
-- Read the authoritative Context files before choosing an implementation.
-- Identify every table, view, and field the script will touch and confirm that each is supplied through `input.config()` before coding.
-- Trace the data from input to final write. Identify expensive reads, repeated searches, external requests, mutations, and possible duplicate work.
-- Choose the simplest algorithm and data structures that comfortably fit the expected scale.
-- Resolve correctness and data-flow questions before polishing syntax.
-- State only material assumptions; do not narrate obvious reasoning.
+- Define the outcome, invariants, side effects, scale, rerun behaviour, and realistic failure modes before coding.
+- Trace the flow: input, validation, reads, transformation, writes, output.
+- Choose the simplest algorithm and data structures that fit the expected scale.
+- Validate script-wide requirements before expensive work or mutations.
+- Prefer one deliberate pass over records when it remains clear.
+- Split an Automation into focused scripts when that improves clarity, reliability, or runtime management.
+- Treat each script as isolated; pass values explicitly or persist them in Airtable.
 
-## 2. Design the execution path
+## Keep code direct
 
-- Make the primary flow readable from top to bottom: acquire, validate, load, transform, write, report.
-- Validate script-wide requirements before expensive queries, external requests, or mutations.
-- Separate pure transformation from Airtable reads, writes, and external side effects when doing so clarifies the flow.
-- Prefer one deliberate pass over records. Combine related work when that reduces queries, scans, allocations, or mutations without obscuring intent.
-- Decide duplicate, rerun, partial-failure, and timeout behaviour before mutations begin when those risks exist.
-- Avoid speculative flexibility and hypothetical future requirements.
-- If an Automation script becomes too large to understand, test, or operate safely, split it into focused script actions.
-- Treat every script action as an isolated program. Do not assume variables, objects, caches, or other in-memory state carry into the next script.
-- Pass inter-script values explicitly through Automation outputs and inputs, or persist state in Airtable.
-
-## 3. Keep code direct and compact
-
-- Prefer direct, linear code for short one-off operations.
-- Extract a function only when it names a meaningful operation, contains substantial logic, isolates a side-effect or failure boundary, or is genuinely reused.
-- Do not wrap two or three obvious lines merely to make the script look structured.
-- Use the fewest lines that remain easy to scan, debug, and change safely.
+- Make the main flow readable from top to bottom.
+- Keep short one-off work inline.
+- Extract a function only when it names meaningful logic, hides substantial complexity, isolates a side effect or failure boundary, or is reused.
 - Prefer guard clauses and `continue` over deep nesting.
-- Avoid clever one-liners, nested ternaries, dense chaining, and compressed control flow.
-- Keep related declarations and operations close together.
+- Avoid clever one-liners, nested ternaries, dense chains, speculative abstractions, classes, and generic frameworks.
+- Keep related declarations and operations together.
 
-## 4. Make intent obvious
+## Make intent visible
 
-- Use precise names that express business meaning and units: `recordsByEmail`, `updates`, `elapsedMs`, `cutoffDate`.
-- Use one consistent representation for IDs, statuses, dates, blanks, and field values.
-- Distinguish raw records, derived values, and mutation payloads through naming.
+- Use precise names with business meaning and units.
+- Distinguish source records, derived values, indexes, and mutation payloads.
+- Use one representation for IDs, statuses, dates, blanks, and field values.
 - Comment decisions, constraints, and non-obvious Airtable behaviour—not syntax.
-- Remove comments that merely repeat the code.
-- Use formatting to expose structure; do not rely on blank lines or headings to compensate for tangled logic.
+- State only material assumptions.
 
-## 5. Optimise the expensive work first
+## Use inputs and schema safely
 
-- Optimise algorithm shape, Airtable I/O, external requests, and mutation count before micro-optimising JavaScript syntax.
-- Query only the fields required by the script.
-- Use a filtered view when it materially reduces the records loaded.
-- Use `selectRecordAsync` when only one known record is needed.
-- Build a `Map` or `Set` once for repeated matching, membership checks, grouping, or deduplication.
-- Do not use `.find()` or `.filter()` repeatedly inside large loops when an index can make the work linear.
-- Avoid unnecessary passes, intermediate arrays, object copies, and repeated cell-value conversions on large datasets.
-- Compute stable values once outside loops.
-- Do not parallelise Airtable mutations blindly; respect platform limits and preserve predictable failure behaviour.
-- Measure or estimate the dominant cost before adding complexity for performance.
+- Destructure every table, view, and field from `input.config()` at the start.
+- Never hard-code table, view, or field names or IDs.
+- Use configured Airtable models directly; resolve configured identifiers once.
+- Do not add schema constants, fallback literals, or placeholders.
+- If code needs an unmapped dependency, stop and return to input verification.
 
-## 6. Read and write Airtable efficiently
+## Optimise Airtable work
 
-- Destructure every table, view, and field reference from `input.config()` at the start of the script.
-- Never hard-code table names, table IDs, view names, view IDs, field names, or field IDs anywhere in the script.
-- Use configured Airtable models directly when supplied by the execution environment.
-- When configured inputs are identifiers, resolve each model once after destructuring and reuse the resolved reference.
-- Batch create, update, and delete payloads in groups of no more than 50.
-- Do not write a field when its effective value has not changed.
-- Avoid `await` inside record loops unless operations must be sequential or batching is unavailable.
-- Prepare mutation payloads completely before writing when practical.
-- Prefer the smallest mutation that achieves the outcome.
-- Keep configured table, view, and field references consistent with the authoritative schema.
-- Do not create schema constants, fallback literals, or placeholders in the code.
+- Optimise queries, external requests, mutation count, and algorithm shape before syntax.
+- Query only required fields and use a configured filtered view when it materially reduces records.
+- Use `selectRecordAsync` for one known record.
+- Build `Map` or `Set` indexes for repeated matching, grouping, membership, or deduplication.
+- Avoid repeated `.find()` or `.filter()` calls inside large loops.
+- Compute stable values once and avoid unnecessary passes, copies, and cell-value conversions.
+- Prepare mutation payloads before writing.
+- Write only effective changes and batch mutations in groups of no more than 50.
+- Avoid `await` inside record loops unless work must be sequential or cannot be batched.
+- Do not parallelise Airtable mutations blindly.
 
-## 7. Use JavaScript deliberately
+## Use JavaScript deliberately
 
-- Prefer `const`; use `let` only when reassignment is part of the logic.
-- Use destructuring when the source and meaning of values remain obvious.
-- Use optional chaining and nullish coalescing when they model valid missing values clearly.
-- Use `map`, `filter`, `find`, and `some` when each expresses one clear transformation or question.
-- Prefer `for...of` when processing includes multiple conditions, accumulated outputs, logging, early exits, or error handling.
-- Avoid spread syntax on large collections when it creates unnecessary copies.
-- Avoid mutation of shared data unless it makes ownership and performance clearer.
-- Do not add classes, generic frameworks, configuration layers, or utility libraries without task-specific value.
+- Prefer `const`; use `let` only for reassignment.
+- Use destructuring, optional chaining, and nullish coalescing when they keep the source and meaning clear.
+- Use array methods for one clear transformation or question; use `for...of` for branching, accumulation, logging, early exits, or error handling.
+- Avoid large spread copies and unclear shared mutation.
 
-## 8. Handle errors at the correct boundary
+## Handle operations proportionately
 
-- Fail early with a plain-English message for missing configuration, invalid schema, or conditions that make the entire run unsafe.
-- Include useful identifiers and operation context in errors without exposing secrets or sensitive payloads.
-- Catch an error only when the script can add context, recover, retry safely, skip deliberately, or produce a better outcome.
-- Do not use broad `try/catch` blocks that hide the failing operation.
-- Treat record-level failures separately only when partial completion is useful and safe.
-- Preserve a clear distinction between skipped, unchanged, failed, and completed work when reporting matters.
-- Rely on guarantees established by the environment and validated Context; do not defend against impossible states.
+- Fail early with plain-English context when the whole run is unsafe.
+- Catch errors only to add context, recover, retry safely, or skip deliberately.
+- Keep error boundaries close to the failing operation.
+- Separate record-level failures only when partial completion is useful and safe.
+- Add logs, counters, dry runs, retries, checkpoints, and resume logic only when justified.
+- Never log secrets or unnecessary sensitive data.
+- Prefer safe, resumable termination over incomplete work near timeout.
 
-## 9. Keep operational behaviour proportionate
+## Final check
 
-- Add logging, counters, dry-run behaviour, checkpoints, retries, and resume logic only when the task or risk justifies them.
-- Log decisions and summaries that help diagnose or operate the script; avoid noisy progress narration.
-- Never log secrets, tokens, passwords, or unnecessary sensitive data.
-- Make reruns idempotent when duplicate writes or external side effects are plausible.
-- Check elapsed time only when expected scale approaches the runtime limit.
-- Prefer safe termination with resumable state over rushing incomplete writes near a timeout.
-
-## 10. Final performance pass
-
-Before finalising, verify:
-
-- The script produces the requested result and nothing extra.
-- Every schema and configuration reference exists in the authoritative Context.
-- Every table, view, and field reference originates from the destructured input configuration.
-- No table name, table ID, view name, view ID, field name, or field ID is hard-coded.
-- Each numbered script is independently executable with its own verified input configuration.
-- The dominant operations have appropriate algorithmic complexity.
-- Queries request only necessary data.
-- Repeated lookups use suitable indexes.
-- Mutation payloads contain only real changes and are batched correctly.
-- Failure boundaries protect data consistency.
-- Names and control flow make the script understandable in one read.
+- The script does only the requested job.
+- Every dependency exists in the verified Context and comes from `input.config()`.
+- Each numbered script is independently executable with explicit handoffs.
+- Queries are minimal; repeated lookups are indexed.
+- Writes contain only changes and are batched correctly.
+- Failure boundaries protect consistency.
 - Every function, branch, variable, comment, allocation, log, query, and write earns its place.
 
-Prefer boring, obvious, measurable efficiency over code that merely looks sophisticated.
+Prefer boring, obvious, measurable efficiency over sophisticated-looking code.

@@ -1,3 +1,14 @@
 # Console Log
 
-Paste the latest console output here after running the script.
+Paste only the latest relevant runtime output. For multiple scripts, use labelled
+sections:
+
+```markdown
+## script1.js
+
+...
+
+## script2.js
+
+...
+```

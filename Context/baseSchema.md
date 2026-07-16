@@ -1,8 +1,6 @@
 # Base Schema
 
-Use this file to capture a fresh compact schema for the Airtable base before planning a new script. Replace the previous captured output when the base changes or a new goal begins.
-
-Command to output a compact schema:
+Run this in the target Airtable base before planning a new goal or after schema changes:
 
 ```javascript
 const schema = base.tables.map(table => ({
@@ -10,12 +8,19 @@ const schema = base.tables.map(table => ({
   id: table.id,
   fields: table.fields.map(field => ({
     name: field.name,
-    type: field.type,
-    id: field.id
+    id: field.id,
+    type: field.type
+  })),
+  views: table.views.map(view => ({
+    name: view.name,
+    id: view.id,
+    type: view.type
   }))
 }));
 
 console.log(JSON.stringify(schema, null, 2));
 ```
 
-Paste the latest output below. This file is considered authoritative. The schema must be verified before creating the dependency map or writing code. If a required table or field is missing, ask the user to create it and refresh this file first.
+Paste the latest output below. Treat it as authoritative. If a required table,
+view, field, type, or relationship is missing, update Airtable and refresh this
+file before planning dependencies or writing code.

@@ -6,14 +6,20 @@ Waiting for the user's script goal.
 
 ## Gates
 
-- [ ] Fresh base schema captured and verified.
-- [ ] Script approach planned.
-- [ ] Required table, view, and field dependencies listed.
-- [ ] Airtable input configuration updated.
-- [ ] Logged input configuration verified against dependencies.
-- [ ] Script implementation started.
-- [ ] Console output reviewed and final script verified.
+- [ ] Fresh base schema verified.
+- [ ] Approach and script split planned.
+- [ ] Dependencies and handoffs mapped.
+- [ ] Airtable input configuration captured.
+- [ ] Input keys verified.
+- [ ] Script implemented.
+- [ ] Runtime output reviewed.
+- [ ] Final verification complete.
 
-## Dependency map
+## Scripts
 
-List each script and the exact input keys required for its tables, views, fields, and runtime values.
+For each script, record:
+
+- Purpose and execution type.
+- Tables, views, fields, and runtime values with exact input keys.
+- Reads, mutations, and expected outputs.
+- Values passed to later actions or state persisted in Airtable.
