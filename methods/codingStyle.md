@@ -8,7 +8,7 @@ and readable in one pass.
 - Implement only the verified `output/plan.md`.
 - Define source of truth, ownership, invariants, side effects, scale, eligibility,
   checkpoint, rerun behaviour, and realistic failure modes.
-- Trace the flow: config → model resolution → query → validation → indexing →
+- Trace the flow: config → required container models → query → validation → indexing →
   transformation → external operations → Airtable writes → summary.
 - Choose the simplest execution model and script split that satisfies the goal.
 - Treat every Automation script action as an isolated process, even though
@@ -18,16 +18,20 @@ and readable in one pass.
 
 ## Configuration and schema
 
-- Destructure every used table, view, field, record ID, and runtime setting from
-  `input.config()` at the start.
+- Read inputs once with `const config = input.config()` and reference verified
+  values directly. Destructure only when it materially improves clarity.
 - Never hard-code Airtable table, view, or field names/IDs as literals, constants,
   fallbacks, comments used as configuration, or placeholders.
-- Resolve each configured table/view/field once and reuse the model.
-- Use the verified field model in reads and computed `[field.id]` keys in writes.
+- Resolve only objects needed for method calls, such as tables and views, and
+  reuse them. Do not mirror every configured field into a field-model variable.
+- Use configured field values directly in queries, record reads, and computed
+  write keys when Airtable accepts them.
 - Do not add speculative dependencies. Stop when code requires an unmapped one.
 - Secret names must be documented in the plan. Secret values stay in Airtable
   and must never be logged unmasked or copied into files. Only the input-capture
   helper may emit the documented masked preview.
+- List each verified secret name once in a key-to-name map, build one `secrets`
+  object with `input.secret()`, and reuse `secrets.key`; do not create aliases.
 - Each script action has its own `input.config()`. Repeated keys across actions
   are valid when deliberately configured in each action; never assume one
   action's config or variables are visible to another.
@@ -60,6 +64,8 @@ and readable in one pass.
 ## Main flow and functions
 
 - Keep the main flow readable from top to bottom.
+- Keep one source representation for each value. Before adding a variable, check
+  whether `config`, `secrets`, or an existing object already expresses it clearly.
 - Prefer guard clauses and `continue` over deep nesting.
 - Extract a function only when it names meaningful business logic, isolates an
   external/failure boundary, or is reused.
@@ -90,7 +96,7 @@ and readable in one pass.
 - Sequential `await` inside a loop is acceptable when external API ordering,
   rate limits, per-record failure isolation, or returned IDs require it; state
   the scale and timeout tradeoff in the plan.
-- Use configured field models and correct Airtable value shapes.
+- Use configured field values directly and preserve correct Airtable value shapes.
 
 ## External APIs
 
@@ -147,6 +153,9 @@ and readable in one pass.
   branching, accumulation, sequencing, early exits, or error handling.
 - Avoid large spread copies, unclear shared mutation, and implicit coercion at
   business-rule boundaries.
+- Remove pass-through aliases, repeated configuration declarations, unused
+  variables, and helper abstractions that do not reduce repetition or clarify a
+  business rule.
 - Keep lines and functions readable in Airtable's editor.
 
 ## Final verification
@@ -154,7 +163,8 @@ and readable in one pass.
 - Requirements remain user-owned and unchanged.
 - Plan matches the implemented behaviour and dependencies.
 - Schema and input captures are current.
-- Every used Airtable model comes from verified input configuration.
+- Every resolved Airtable object and directly used field value comes from verified
+  input configuration.
 - Record selection, field types, and computed-field dependencies are valid.
 - Ownership, duplicates, concurrency, reruns, and partial failures are handled.
 - Queries, API calls, and writes fit expected scale and platform limits.

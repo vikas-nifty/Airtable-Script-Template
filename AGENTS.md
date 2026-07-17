@@ -42,10 +42,12 @@ appropriate configuration gate before continuing.
 ## Airtable dependencies
 
 - Every table, view, and field used by a script must be supplied through
-  `input.config()` and destructured at the start. Never hard-code their names or
-  IDs in executable code.
-- Resolve configured IDs once with `base.getTable()` / `table.getField()` and
-  reuse the resulting models.
+  `input.config()`. Keep one `config` object and reference its verified values
+  directly; do not redeclare every input under a second name.
+- Resolve only objects needed for method calls, such as a table or view. Do not
+  create field-model variables when configured field values work directly.
+- Keep secrets in one `secrets` object built from a single key-to-secret-name map;
+  do not redeclare the same secret name or create separate alias variables.
 - Use input keys in `table_field` form, with lower camel case inside each segment,
   for example `projects_startDate`. Use `scope_setting` for non-schema runtime
   values, for example `api_baseUrl`.
@@ -56,6 +58,9 @@ appropriate configuration gate before continuing.
 ## Output files
 
 - One script action: `output/script.js`.
+- `output/script.js` starts with a commented configuration and secrets template.
+  When writing verified code, uncomment it and replace the example secret mapping
+  with the exact documented mappings required by that script.
 - Multiple script actions in one Automation: `output/script1.js`,
   `output/script2.js`, and so on, matching their execution order.
 - Airtable runs actions sequentially in the order configured in the Automation,

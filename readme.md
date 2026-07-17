@@ -48,6 +48,8 @@ verification steps before changing code.
 ## Core rules
 
 - Never hard-code Airtable table, view, or field names or IDs.
+- Keep one input configuration object and avoid duplicate field declarations;
+  resolve only Airtable objects needed for method calls.
 - Never print or store an unmasked secret. Only the input-capture helper may log
   the documented masked preview.
 - Do not assume an Automation supplies a triggering record ID.

@@ -98,7 +98,10 @@ key. Ambiguous ownership must fail visibly before external mutation.
 - Update the plan to reflect final verified keys.
 - Write the complete script or numbered scripts following
   `methods/codingStyle.md`.
-- Destructure configured dependencies at the start and resolve models once.
+- Keep one `config = input.config()` object. Reference its verified values
+  directly and resolve only Airtable objects needed for method calls.
+- Build one `secrets` object from verified secret mappings listed once. Access
+  secrets through that object rather than creating repeated standalone variables.
 - Do not add a new dependency while coding. Return to Configure and Verify.
 - Run static syntax and repository checks before handoff.
 
@@ -118,8 +121,8 @@ key. Ambiguous ownership must fail visibly before external mutation.
 
 ### Automation
 
-- Read configured variables with `input.config()`.
-- Read secrets with `input.secret('Configured Secret Name')`.
+- Read configured variables once with `const config = input.config()`.
+- Read verified secrets once into a `secrets` object and reuse its properties.
 - Use `fetch()` for HTTP; do not use `remoteFetchAsync()`.
 - Never use `input.recordAsync()`.
 - Do not assume the trigger supplies a record ID. If it does not, use a verified
@@ -155,10 +158,10 @@ key. Ambiguous ownership must fail visibly before external mutation.
 - Filtered set: configured view plus `view.selectRecordsAsync({ fields })`.
 - `filterByFormula` is not available in `selectRecordsAsync`; filter in
   JavaScript or use a configured view.
-- Raw value: `record.getCellValue(field)`.
-- Display value: `record.getCellValueAsString(field)`.
-- Create: `table.createRecordAsync({ fields: { [field.id]: value } })`.
-- Update: `table.updateRecordAsync(recordId, { [field.id]: value })`.
+- Raw value: `record.getCellValue(config.table_field)`.
+- Display value: `record.getCellValueAsString(config.table_field)`.
+- Create: `table.createRecordAsync({ fields: { [config.table_field]: value } })`.
+- Update: `table.updateRecordAsync(recordId, { [config.table_field]: value } })`.
 - Batch creates/updates/deletes: groups of no more than 50.
 - Linked records: arrays of `{ id }`; never write record IDs as bare strings.
 - Single select: `{ name: option }`; multiple select: arrays of `{ name }`.

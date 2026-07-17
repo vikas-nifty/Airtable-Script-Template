@@ -46,6 +46,8 @@ For each script, record:
 - Tables, views, fields, and runtime values with exact input keys.
 - Reads, mutations, and expected outputs.
 - Values passed to later actions or state persisted in Airtable.
+- Objects that require resolution; all other dependencies should be referenced
+  directly from the single input configuration object.
 
 ## Risks and tests
 
