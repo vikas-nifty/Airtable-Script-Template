@@ -67,6 +67,8 @@ and readable in one pass.
   dense chains, and clever one-liners.
 - Use precise business names and one representation for IDs, blanks, statuses,
   dates, and payload values.
+- Add compact, one-line comments for major script sections so someone viewing
+  only the script can understand its structure. Do not comment obvious details.
 - Comment decisions and non-obvious Airtable/API behaviour, not syntax.
 
 ## Queries and indexes
